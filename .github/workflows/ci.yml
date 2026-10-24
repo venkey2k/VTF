@@ -31,7 +31,7 @@ jobs:
 
     - name: Build and install package
       run: |
-        pip install -v -e .
+        pip install -v .
 
     - name: Run Quickstart Verification
       run: |

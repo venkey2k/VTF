@@ -28,7 +28,12 @@ enum VTFCodec : uint8_t {
     VTF_CODEC_NONE        = 0,
     VTF_CODEC_LZ4_FAST    = 1, // Default: Delta + SIMD BSS + LZ4-Fast (accel=4)
     VTF_CODEC_LZ4_DEFAULT = 2,
-    VTF_CODEC_ZSTD        = 3
+    VTF_CODEC_ZSTD        = 3,
+
+    CODEC_NONE            = 0,
+    CODEC_LZ4_FAST        = 1,
+    CODEC_LZ4_DEFAULT     = 2,
+    CODEC_ZSTD            = 3
 };
 
 #pragma pack(push, 1)

@@ -10,7 +10,9 @@
  *     fallback so it works on any machine even without external libraries installed.
  */
 
+#ifndef VTF_BUILDING_DLL
 #define VTF_BUILDING_DLL
+#endif
 #include "vtf.hpp"
 
 #include <cstdint>
@@ -43,6 +45,11 @@ typedef SSIZE_T ssize_t;
 #endif
 
 namespace vtf {
+
+static constexpr uint8_t CODEC_NONE        = VTF_CODEC_NONE;
+static constexpr uint8_t CODEC_LZ4_FAST    = VTF_CODEC_LZ4_FAST;
+static constexpr uint8_t CODEC_LZ4_DEFAULT = VTF_CODEC_LZ4_DEFAULT;
+static constexpr uint8_t CODEC_ZSTD        = VTF_CODEC_ZSTD;
 
 // ============================================================================
 // Platform-Independent File I/O Helpers

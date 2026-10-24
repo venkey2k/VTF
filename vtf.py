@@ -209,25 +209,29 @@ def _load_libvtf() -> ctypes.CDLL:
     is_mac = sys.platform == "darwin"
 
     # Search candidates across library extensions (.dll, .so, .dylib, .pyd)
+    candidate_paths: List[Path] = []
+
+    # 1. Search for compiled extensions in current and parent directories
+    for pattern in ["*_libvtf*", "*vtf_core*", "libvtf*", "vtf*"]:
+        for p in here.glob(f"{pattern}*"):
+            if p.suffix in [".so", ".pyd", ".dylib", ".dll"]:
+                candidate_paths.append(p)
+        for p in here.parent.glob(f"{pattern}*"):
+            if p.suffix in [".so", ".pyd", ".dylib", ".dll"]:
+                candidate_paths.append(p)
+
     candidate_names = [
-        "vtf.dll" if is_win else ("libvtf.dylib" if is_mac else "libvtf.so"),
+        "vtf.dll" if is_win else "libvtf.so",
         "libvtf.dll",
         "libvtf.so",
         "libvtf.dylib",
         "_libvtf.so",
         "_libvtf.pyd",
     ]
-
-    candidate_paths: List[Path] = []
     for name in candidate_names:
         candidate_paths.append(here / name)
         candidate_paths.append(here.parent / name)
         candidate_paths.append(temp_dir / name)
-
-    # Also search for setuptools-compiled extension wheels matching glob
-    ext_suffix = ".pyd" if is_win else (".dylib" if is_mac else ".so")
-    for p in here.glob(f"*vtf*{ext_suffix}"):
-        candidate_paths.insert(0, p)
 
     so_path: Optional[Path] = None
     for p in candidate_paths:
@@ -258,11 +262,11 @@ def _load_libvtf() -> ctypes.CDLL:
             else:
                 raise RuntimeError(
                     "VTF pre-compiled library not found and no C++ compiler (MSVC 'cl.exe' or 'g++') detected on PATH. "
-                    "Please install a binary wheel via `pip install venkey-tick-format` or install Build Tools."
+                    "Please install a binary wheel via `pip install nuro-vtf` or install Build Tools."
                 )
         elif is_mac:
             cmd = [
-                "clang++", "-O3", "-march=native", "-std=c++17", "-shared",
+                "clang++", "-O3", "-std=c++17", "-shared",
                 "-fPIC", str(cpp_src), "-o", str(target_lib)
             ]
         else:
