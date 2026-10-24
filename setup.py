@@ -13,6 +13,9 @@ class BuildExt(build_ext):
                     "/std:c++17",
                     "/EHsc",
                     "/DVTF_BUILDING_DLL",
+                    "/DNOMINMAX",
+                    "/DWIN32_LEAN_AND_MEAN",
+                    "/D_CRT_SECURE_NO_WARNINGS",
                 ]
             else:
                 ext.extra_compile_args = [

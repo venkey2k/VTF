@@ -120,6 +120,7 @@ VTF_API void     vtf_reader_destroy(void* r);
 
 VTF_API int      vtf_recover_file(const char* path, VTFRecoveryReport* out_report);
 VTF_API uint32_t vtf_crc32c(const void* data, size_t len);
+VTF_API int      vtf_codec_is_supported(int codec_id);
 
 VTF_API int      raw_lz4_binary_write(const char* path, const VTFTickRow* rows, size_t count, size_t block_rows, int accel);
 VTF_API int      raw_lz4_binary_read(const char* path, VTFTickRow* out_rows, size_t max_rows);

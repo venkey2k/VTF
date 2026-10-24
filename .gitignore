@@ -11,6 +11,8 @@
 # Generated test and sample data files
 *.vtf
 sample_*.vtf
+.bench_tmp/
+benchmark_results.json
 
 # Python build and packaging
 build/

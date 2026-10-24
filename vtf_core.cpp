@@ -10,6 +10,16 @@
  *     fallback so it works on any machine even without external libraries installed.
  */
 
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS 1
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif
+
 #ifndef VTF_BUILDING_DLL
 #define VTF_BUILDING_DLL
 #endif
@@ -26,9 +36,6 @@
 #include <sys/stat.h>
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 #include <windows.h>
 #include <io.h>
 #include <BaseTsd.h>
@@ -417,7 +424,16 @@ struct CodecDispatch {
             }
         }
 #else
-        const char* lz4_names[] = {"liblz4.so.1", "liblz4.so", "liblz4.dylib", "/usr/lib/x86_64-linux-gnu/liblz4.so.1"};
+        const char* lz4_names[] = {
+            "liblz4.so.1",
+            "liblz4.so",
+            "liblz4.dylib",
+            "liblz4.1.dylib",
+            "/opt/homebrew/lib/liblz4.dylib",
+            "/usr/local/lib/liblz4.dylib",
+            "/usr/lib/x86_64-linux-gnu/liblz4.so.1",
+            "/usr/lib/aarch64-linux-gnu/liblz4.so.1"
+        };
         for (const char* name : lz4_names) {
             void* h = ::dlopen(name, RTLD_LAZY | RTLD_LOCAL);
             if (h) {
@@ -428,7 +444,16 @@ struct CodecDispatch {
                 if (lz4_fast && lz4_decomp && lz4_bound) break;
             }
         }
-        const char* zstd_names[] = {"libzstd.so.1", "libzstd.so", "libzstd.dylib", "/usr/lib/x86_64-linux-gnu/libzstd.so.1"};
+        const char* zstd_names[] = {
+            "libzstd.so.1",
+            "libzstd.so",
+            "libzstd.dylib",
+            "libzstd.1.dylib",
+            "/opt/homebrew/lib/libzstd.dylib",
+            "/usr/local/lib/libzstd.dylib",
+            "/usr/lib/x86_64-linux-gnu/libzstd.so.1",
+            "/usr/lib/aarch64-linux-gnu/libzstd.so.1"
+        };
         for (const char* name : zstd_names) {
             void* h = ::dlopen(name, RTLD_LAZY | RTLD_LOCAL);
             if (h) {
@@ -1654,6 +1679,22 @@ VTF_API int raw_lz4_binary_read(const char* path, VTFTickRow* out_rows, size_t m
     }
     vtf::os_close(fd);
     return static_cast<int>(idx);
+}
+
+VTF_API int vtf_codec_is_supported(int codec_id) {
+    if (codec_id == VTF_CODEC_NONE || codec_id == VTF_CODEC_LZ4_FAST || codec_id == VTF_CODEC_LZ4_DEFAULT) {
+        return 1;
+    }
+    if (codec_id == VTF_CODEC_ZSTD) {
+        const auto& cd = vtf::codecs();
+        return (cd.zstd_compress && cd.zstd_decomp && cd.zstd_bound && cd.zstd_is_error) ? 1 : 0;
+    }
+    return 0;
+}
+
+// C-extension entry point for Python setuptools on Windows/macOS/Linux
+VTF_API void* PyInit__libvtf() {
+    return nullptr;
 }
 
 } // extern "C"

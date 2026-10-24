@@ -211,14 +211,33 @@ def _load_libvtf() -> ctypes.CDLL:
     # Search candidates across library extensions (.dll, .so, .dylib, .pyd)
     candidate_paths: List[Path] = []
 
-    # 1. Search for compiled extensions in current and parent directories
-    for pattern in ["*_libvtf*", "*vtf_core*", "libvtf*", "vtf*"]:
-        for p in here.glob(f"{pattern}*"):
-            if p.suffix in [".so", ".pyd", ".dylib", ".dll"]:
-                candidate_paths.append(p)
-        for p in here.parent.glob(f"{pattern}*"):
-            if p.suffix in [".so", ".pyd", ".dylib", ".dll"]:
-                candidate_paths.append(p)
+    # 1. Check Python's installed / imported module spec if built via setuptools
+    try:
+        import importlib.util
+        spec = importlib.util.find_spec("_libvtf")
+        if spec and spec.origin:
+            candidate_paths.append(Path(spec.origin))
+    except Exception:
+        pass
+
+    # 2. Search local, parent, build, and temporary directories
+    search_dirs = [here, here.parent, temp_dir]
+    build_dir = here / "build"
+    if build_dir.is_dir():
+        for sub in build_dir.glob("lib*"):
+            if sub.is_dir():
+                search_dirs.append(sub)
+
+    for sdir in search_dirs:
+        if sdir.is_dir():
+            try:
+                for p in sdir.iterdir():
+                    if p.is_file() and p.suffix.lower() in [".so", ".pyd", ".dylib", ".dll"]:
+                        name = p.name.lower()
+                        if any(k in name for k in ["_libvtf", "vtf_core", "libvtf", "vtf"]):
+                            candidate_paths.append(p)
+            except Exception:
+                pass
 
     candidate_names = [
         "vtf.dll" if is_win else "libvtf.so",
@@ -256,7 +275,11 @@ def _load_libvtf() -> ctypes.CDLL:
         # Detect available compilers
         if is_win:
             if shutil.which("cl.exe"):
-                cmd = ["cl.exe", "/O2", "/std:c++17", "/EHsc", "/LD", str(cpp_src), f"/Fe:{target_lib}"]
+                cmd = [
+                    "cl.exe", "/O2", "/std:c++17", "/EHsc", "/LD",
+                    "/DNOMINMAX", "/DWIN32_LEAN_AND_MEAN", "/D_CRT_SECURE_NO_WARNINGS",
+                    str(cpp_src), f"/Fe:{target_lib}"
+                ]
             elif shutil.which("g++"):
                 cmd = ["g++", "-O3", "-std=c++17", "-shared", str(cpp_src), "-o", str(target_lib)]
             else:
@@ -271,7 +294,7 @@ def _load_libvtf() -> ctypes.CDLL:
             ]
         else:
             cmd = [
-                "g++", "-O3", "-march=native", "-funroll-loops", "-std=c++17",
+                "g++", "-O3", "-funroll-loops", "-std=c++17",
                 "-shared", "-fPIC", str(cpp_src), "-o", str(target_lib), "-ldl"
             ]
 
@@ -381,8 +404,23 @@ def _load_libvtf() -> ctypes.CDLL:
     ]
     lib.raw_lz4_binary_read.restype = ctypes.c_int
 
+    if hasattr(lib, "vtf_codec_is_supported"):
+        lib.vtf_codec_is_supported.argtypes = [ctypes.c_int]
+        lib.vtf_codec_is_supported.restype = ctypes.c_int
+
     _LIBVTF = lib
     return lib
+
+
+def is_codec_supported(codec: int) -> bool:
+    """Returns True if the given compression codec is supported and available on this host."""
+    try:
+        lib = _load_libvtf()
+        if hasattr(lib, "vtf_codec_is_supported"):
+            return bool(lib.vtf_codec_is_supported(int(codec)))
+    except Exception:
+        pass
+    return int(codec) in (CODEC_NONE, CODEC_LZ4_FAST, CODEC_LZ4_DEFAULT)
 
 
 # ============================================================================

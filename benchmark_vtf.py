@@ -18,6 +18,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import os
+import shutil
 import statistics
 import tempfile
 import time
@@ -223,6 +224,9 @@ def run_correctness_and_crash_tests(ticks: np.ndarray, work_dir: Path) -> Dict[s
         (vtf.CODEC_ZSTD, "VTF_ZSTD"),
         (vtf.CODEC_NONE, "VTF_NONE"),
     ]:
+        if not vtf.is_codec_supported(codec_id):
+            print(f"Skipping {label}: dynamic library not present on this host.")
+            continue
         fpath = work_dir / f"test_{label}.vtf"
         with vtf.VTFWriter(fpath, codec=codec_id, block_rows=16384) as w:
             w.append(subset)
@@ -391,14 +395,15 @@ def run_benchmarks(ticks: np.ndarray, work_dir: Path, trials: int = 5) -> List[D
     )
 
     # 3. VTF v1.0 (ZSTD Level 3)
-    p_vtf_zstd = work_dir / "bench_vtf_zstd.vtf"
-    record_bench(
-        "VTF v1.0 (Zstd-L3)",
-        p_vtf_zstd,
-        lambda: _vtf_write_helper(p_vtf_zstd, ticks, vtf.CODEC_ZSTD, 16384),
-        lambda: _vtf_read_helper(p_vtf_zstd),
-        "Yes (Block CRC32C + Auto-Rebuild)",
-    )
+    if vtf.is_codec_supported(vtf.CODEC_ZSTD):
+        p_vtf_zstd = work_dir / "bench_vtf_zstd.vtf"
+        record_bench(
+            "VTF v1.0 (Zstd-L3)",
+            p_vtf_zstd,
+            lambda: _vtf_write_helper(p_vtf_zstd, ticks, vtf.CODEC_ZSTD, 16384),
+            lambda: _vtf_read_helper(p_vtf_zstd),
+            "Yes (Block CRC32C + Auto-Rebuild)",
+        )
 
     # 4. Raw Binary + LZ4-Fast (C++ struct blocks)
     p_raw_lz4_fast = work_dir / "bench_raw_lz4_fast.bin"
@@ -482,9 +487,9 @@ def main() -> None:
     print(f"[1/3] Generating {num_rows:,} realistic NIFTY 50 & SENSEX option ticks (156 B/tick = {num_rows * 156 / (1024**2):.2f} MB)...")
     ticks = generate_nifty_sensex_ticks(num_rows=num_rows, seed=42)
 
-    with tempfile.TemporaryDirectory(prefix="vtf_bench_") as tmpdir:
-        work_dir = Path(tmpdir)
-
+    work_dir = Path(__file__).resolve().parent / ".bench_tmp"
+    work_dir.mkdir(parents=True, exist_ok=True)
+    try:
         print("[2/3] Running bit-exact round-trip, predicate pushdown, and 3 crash recovery tests...")
         test_report = run_correctness_and_crash_tests(ticks, work_dir)
         print("      -> All 4 codecs passed 100% bit-exact verification across all 22 fields.")
@@ -495,6 +500,8 @@ def main() -> None:
 
         print("[3/3] Running 5-trial reproducible benchmarks across VTF, Raw LZ4, Arrow IPC, and Parquet...")
         bench_rows = run_benchmarks(ticks, work_dir, trials=5)
+    finally:
+        shutil.rmtree(work_dir, ignore_errors=True)
 
     print("\n" + "-" * 112)
     header = (
@@ -512,8 +519,7 @@ def main() -> None:
         )
     print("-" * 112)
 
-    out_json = Path(__file__).resolve().parent.parent / "intermediate" / "benchmark_results.json"
-    out_json.parent.mkdir(parents=True, exist_ok=True)
+    out_json = Path(__file__).resolve().parent / "benchmark_results.json"
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump({"tests": test_report, "benchmarks": bench_rows}, f, indent=2)
     print(f"\nSaved detailed JSON results to {out_json}")
