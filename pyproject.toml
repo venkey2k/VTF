@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nuro-vtf"
-version = "1.0.0"
+version = "1.0.1"
 description = "VTF (Venkey Tick Format) v1.0 — High-Frequency Option Market Data Format & Zero-Copy Engine"
 readme = "README.md"
 license = "MIT"
