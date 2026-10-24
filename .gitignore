@@ -1,0 +1,35 @@
+# Compiled shared libraries and objects
+*.so
+*.dll
+*.dylib
+*.pyd
+*.o
+*.obj
+*.a
+*.lib
+
+# Generated test and sample data files
+*.vtf
+sample_*.vtf
+
+# Python build and packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+__pycache__/
+*.py[cod]
+
+# Testing & Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.bak
+*~
