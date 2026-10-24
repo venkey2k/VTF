@@ -1,8 +1,8 @@
 # VTF (Venkey Tick Format) v1.0
 
 [![CI](https://github.com/venkey2k/VTF/actions/workflows/ci.yml/badge.svg)](https://github.com/venkey2k/VTF/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/pypi/v/venkey-tick-format.svg)](https://pypi.org/project/venkey-tick-format/)
-[![Python versions](https://img.shields.io/pypi/pyversions/venkey-tick-format.svg)](https://pypi.org/project/venkey-tick-format/)
+[![PyPI version](https://img.shields.io/pypi/v/nuro-vtf.svg)](https://pypi.org/project/nuro-vtf/)
+[![Python versions](https://img.shields.io/pypi/pyversions/nuro-vtf.svg)](https://pypi.org/project/nuro-vtf/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **VTF (Venkey Tick Format)** is a custom binary market-data storage format and zero-copy streaming engine engineered specifically for high-frequency **NSE (NIFTY 50)** and **BSE (SENSEX)** equity index options.
@@ -33,7 +33,7 @@ It captures trades, 5-level Market-By-Price (L2) order books, Open Interest (OI)
 Install pre-built binary wheels directly from PyPI:
 
 ```bash
-pip install venkey-tick-format
+pip install nuro-vtf
 ```
 
 Or install from source with full CPU-native optimizations:

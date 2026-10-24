@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/venkey-tick-format
+      url: https://pypi.org/p/nuro-vtf
     permissions:
       id-token: write
     steps:

@@ -37,7 +37,7 @@ readme_file = Path(__file__).resolve().parent / "README.md"
 long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists() else ""
 
 setup(
-    name="venkey-tick-format",
+    name="nuro-vtf",
     version="1.0.0",
     description="VTF (Venkey Tick Format) v1.0 — High-Frequency Option Market Data Format & Zero-Copy Engine",
     long_description=long_description,
@@ -50,7 +50,7 @@ setup(
         "Bug Tracker": "https://github.com/venkey2k/VTF/issues",
     },
     license="MIT",
-    py_modules=["vtf"],
+    py_modules=["vtf", "nuro_vtf"],
     ext_modules=[vtf_extension],
     cmdclass={"build_ext": BuildExt},
     package_data={"": ["libvtf.so", "vtf_core.cpp", "vtf.hpp"]},
