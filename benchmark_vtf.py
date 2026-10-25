@@ -16,6 +16,7 @@ Also validates:
 from __future__ import annotations
 
 import dataclasses
+import gc
 import json
 import os
 import shutil
@@ -321,6 +322,22 @@ def run_correctness_and_crash_tests(ticks: np.ndarray, work_dir: Path) -> Dict[s
 # 4. Reproducible Performance & Compression Benchmarks
 # ============================================================================
 
+def _unlink_released_file(path: Path, attempts: int = 40, delay_s: float = 0.05) -> None:
+    for attempt in range(attempts):
+        # PyArrow keeps the source file mapped until a GC pass on Windows,
+        # so a plain unlink fails with WinError 32.
+        gc.collect()
+        try:
+            path.unlink()
+            return
+        except FileNotFoundError:
+            return
+        except PermissionError:
+            if attempt + 1 == attempts:
+                raise
+            time.sleep(delay_s)
+
+
 def run_benchmarks(ticks: np.ndarray, work_dir: Path, trials: int = 5) -> List[Dict[str, Any]]:
     num_rows = len(ticks)
     raw_bytes = num_rows * vtf.VTF_TICK_DTYPE.itemsize
@@ -337,20 +354,19 @@ def run_benchmarks(ticks: np.ndarray, work_dir: Path, trials: int = 5) -> List[D
         crash_safe: str,
     ) -> None:
         write_fn()
-        _ = read_fn()
+        read_fn()
 
         w_times = []
         r_times = []
         for _ in range(trials):
-            if fpath.exists():
-                fpath.unlink()
+            _unlink_released_file(fpath)
             t0 = time.perf_counter()
             write_fn()
             t1 = time.perf_counter()
             w_times.append(t1 - t0)
 
             t2 = time.perf_counter()
-            _ = read_fn()
+            read_fn()
             t3 = time.perf_counter()
             r_times.append(t3 - t2)
 
@@ -501,6 +517,7 @@ def main() -> None:
         print("[3/3] Running 5-trial reproducible benchmarks across VTF, Raw LZ4, Arrow IPC, and Parquet...")
         bench_rows = run_benchmarks(ticks, work_dir, trials=5)
     finally:
+        gc.collect()
         shutil.rmtree(work_dir, ignore_errors=True)
 
     print("\n" + "-" * 112)
