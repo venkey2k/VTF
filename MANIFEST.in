@@ -1,0 +1,7 @@
+include vtf.hpp
+include vtf_core.cpp
+include benchmark_vtf.py
+include example_quickstart.py
+include VTF_Specification_and_Benchmarks.md
+include Makefile
+include build.sh

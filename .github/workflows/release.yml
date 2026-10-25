@@ -15,17 +15,24 @@ jobs:
         os: [ubuntu-22.04, windows-latest, macos-15]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
+
+    - name: Set up QEMU
+      if: runner.os == 'Linux'
+      uses: docker/setup-qemu-action@v4
+      with:
+        platforms: arm64
 
     - name: Build wheels via cibuildwheel
-      uses: pypa/cibuildwheel@v2.22.0
+      uses: pypa/cibuildwheel@v4.3.4
       env:
-        CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-* cp313-*"
-        CIBW_SKIP: "*-musllinux_* pp* *_i686 *_win32"
-        CIBW_ARCHS_LINUX: auto
+        CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-* cp313-* cp314-*"
+        CIBW_SKIP: "*-musllinux_* pp* *_i686 *-win32"
+        CIBW_ARCHS_LINUX: "auto aarch64"
         CIBW_ARCHS_MACOS: "x86_64 arm64"
         CIBW_ARCHS_WINDOWS: auto
         CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+        CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
         CIBW_ENVIRONMENT_WINDOWS: 'CL="/DNOMINMAX /DWIN32_LEAN_AND_MEAN /D_CRT_SECURE_NO_WARNINGS"'
         CIBW_TEST_REQUIRES: numpy
         CIBW_TEST_COMMAND: 'python -c "import vtf; print(''VTF tick itemsize:'', vtf.VTF_TICK_DTYPE.itemsize)"'
@@ -40,10 +47,10 @@ jobs:
     name: Build source distribution (sdist)
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: "3.11"
 

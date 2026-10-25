@@ -14,13 +14,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-latest, macos-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -47,6 +47,15 @@ jobs:
     - name: Run Quickstart Verification
       run: |
         python example_quickstart.py
+
+    - name: Verify sdist builds from source
+      if: runner.os == 'Linux' && matrix.python-version == '3.13'
+      run: |
+        python -m pip install build
+        python -m build --sdist
+        python -m venv /tmp/vtf-sdist-venv
+        /tmp/vtf-sdist-venv/bin/pip install --no-cache-dir dist/*.tar.gz
+        /tmp/vtf-sdist-venv/bin/python -c "import vtf; print('sdist itemsize:', vtf.VTF_TICK_DTYPE.itemsize)"
 
     - name: Run Benchmarks and Integrity Verification
       run: |

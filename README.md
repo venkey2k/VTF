@@ -44,7 +44,7 @@ cd VTF
 pip install -v .
 ```
 
-*Compatible with Linux (x86_64, aarch64), Windows (x64), and macOS (Apple Silicon & Intel).*
+*Compatible with Python 3.9–3.14 on Linux (x86_64, aarch64), Windows (x64), and macOS (Apple Silicon & Intel).*
 
 ---
 
@@ -134,6 +134,7 @@ VTF/
 ├── VTF_Specification_and_Benchmarks.md # Complete wire format specification
 ├── setup.py                            # C++ extension setuptools builder
 ├── pyproject.toml                      # PEP 517 build & cibuildwheel config
+├── MANIFEST.in                         # sdist source manifest (header + core + tools)
 ├── LICENSE                             # MIT License
 └── .github/workflows/
     ├── ci.yml                          # Multi-OS CI testing (Linux, Windows, macOS)

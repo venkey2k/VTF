@@ -33,6 +33,7 @@ vtf_extension = Extension(
     "_libvtf",
     sources=["vtf_core.cpp"],
     include_dirs=["."],
+    depends=["vtf.hpp"],
     language="c++",
 )
 
@@ -41,7 +42,7 @@ long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists
 
 setup(
     name="nuro-vtf",
-    version="1.0.6",
+    version="1.0.7",
 
     description="VTF (Venkey Tick Format) v1.0 — High-Frequency Option Market Data Format & Zero-Copy Engine",
     long_description=long_description,
@@ -71,6 +72,7 @@ setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Programming Language :: C++",
         "Operating System :: POSIX :: Linux",
         "Operating System :: Microsoft :: Windows",
