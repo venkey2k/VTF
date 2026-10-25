@@ -4,7 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nuro-vtf"
-version = "1.0.3"
+version = "1.0.4"
+
 description = "VTF (Venkey Tick Format) v1.0 — High-Frequency Option Market Data Format & Zero-Copy Engine"
 readme = "README.md"
 license = "MIT"
@@ -53,6 +54,9 @@ Issues = "https://github.com/venkey2k/VTF/issues"
 [tool.cibuildwheel]
 build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
 skip = "*-musllinux_* pp* *_i686 *_win32"
+manylinux-x86_64-image = "manylinux_2_28"
+archs-macos = ["x86_64", "arm64"]
 test-requires = "numpy"
 test-command = "python -c \"import vtf; print('VTF itemsize:', vtf.VTF_TICK_DTYPE.itemsize)\""
+
 
