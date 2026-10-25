@@ -41,7 +41,7 @@ long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists
 
 setup(
     name="nuro-vtf",
-    version="1.0.1",
+    version="1.0.3",
     description="VTF (Venkey Tick Format) v1.0 — High-Frequency Option Market Data Format & Zero-Copy Engine",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -58,14 +58,13 @@ setup(
     cmdclass={"build_ext": BuildExt},
     package_data={"": ["libvtf.so", "vtf_core.cpp", "vtf.hpp"]},
     include_package_data=True,
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=["numpy>=1.20"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Financial and Insurance Industry",
         "Topic :: Office/Business :: Financial :: Investment",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",

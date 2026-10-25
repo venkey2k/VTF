@@ -26,22 +26,14 @@ jobs:
     - name: Build wheels via cibuildwheel
       uses: pypa/cibuildwheel@v2.22.0
       env:
-        CIBW_ARCHS_LINUX: auto aarch64
+        CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-* cp313-*"
+        CIBW_SKIP: "*-musllinux_* pp* *_i686 *_win32"
+        CIBW_ARCHS_LINUX: auto
         CIBW_ARCHS_MACOS: auto
         CIBW_ARCHS_WINDOWS: auto
-        # Install system compression libs inside Linux containers
-        CIBW_BEFORE_ALL_LINUX: >
-          yum install -y lz4-devel libzstd-devel 2>/dev/null ||
-          apk add --no-cache lz4-dev zstd-dev 2>/dev/null ||
-          apt-get update && apt-get install -y liblz4-dev libzstd-dev 2>/dev/null || true
-        # Install Homebrew libs on macOS runners
-        CIBW_BEFORE_ALL_MACOS: brew install lz4 zstd || true
-        # Pass NOMINMAX + CRT flags to MSVC on Windows
-        CIBW_ENVIRONMENT_WINDOWS: >
-          CL="/DNOMINMAX /DWIN32_LEAN_AND_MEAN /D_CRT_SECURE_NO_WARNINGS"
-        # Skip PyPy and very old 32-bit Windows builds (no MSVC 32-bit in runners)
-        CIBW_SKIP: "pp* cp38-win32 cp39-win32"
-        # Verbose output to diagnose any remaining failures
+        CIBW_ENVIRONMENT_WINDOWS: 'CL="/DNOMINMAX /DWIN32_LEAN_AND_MEAN /D_CRT_SECURE_NO_WARNINGS"'
+        CIBW_TEST_REQUIRES: numpy
+        CIBW_TEST_COMMAND: 'python -c "import vtf; print(''VTF tick itemsize:'', vtf.VTF_TICK_DTYPE.itemsize)"'
         CIBW_BUILD_VERBOSITY: "1"
 
     - uses: actions/upload-artifact@v4
