@@ -41,7 +41,7 @@ long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists
 
 setup(
     name="nuro-vtf",
-    version="1.0.4",
+    version="1.0.5",
 
     description="VTF (Venkey Tick Format) v1.0 — High-Frequency Option Market Data Format & Zero-Copy Engine",
     long_description=long_description,
