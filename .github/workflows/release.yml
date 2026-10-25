@@ -12,16 +12,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        os: [ubuntu-22.04, windows-latest, macos-13, macos-14]
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set up QEMU
-      if: runner.os == 'Linux'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: all
 
     - name: Build wheels via cibuildwheel
       uses: pypa/cibuildwheel@v2.22.0
@@ -43,7 +37,7 @@ jobs:
 
   build_sdist:
     name: Build source distribution (sdist)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
 
@@ -66,7 +60,7 @@ jobs:
   publish_to_pypi:
     name: Publish distribution to PyPI
     needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     environment:
       name: pypi
       url: https://pypi.org/p/nuro-vtf
